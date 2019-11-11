@@ -1,30 +1,33 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 import java.util.PriorityQueue;
+import java.util.Scanner;
 
 public class Huffman {
 
     public static void main(String[] args) {
         // Create scanner to ask for user input
-        String message = "";
-        if (args.length <= 1) {
-            Scanner scanner = new Scanner(System.in);
-            message = scanner.next();
-        }
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Text: ");
+        String message = scanner.nextLine();
 
-        if (args[0].equals("-")) encode(args.length > 1 ? args[1] : message);
-//    if(args[0] == '+') decode(args.length > 1 ? args[1] : message);
-
+        encode(message);
     }
 
+    /*
+     * Encoding
+     */
     private static void encode(String message) {
-        System.out.println("Originaler Text: " + message);
-        System.out.println("Encodierter Text: " + code(message,
-                createEncodingHashMap(
-                        createTreeNodes(
-                                initQueue(
-                                        countCharacterOccurrences(message))), new HashMap<>(), new StringBuilder())));
+        // create encodingMap to avoid traversing through the tree multiple times
+        HashMap<Character, String> encodingMap = createEncodingHashMap(createTreeNodes(
+                initQueue(countCharacterOccurrences(message))), new HashMap<>(), new StringBuilder());
+
+        // safe encodingMap in file so that message could be decoded everywhere with this file
+        String encodedMessage = code(message, encodingMap);
+        System.out.println("Encoded Text: " + encodedMessage);
+
+        // todo: safe HashMap to run decode independently from encode method
+        decode(encodedMessage, encodingMap);
     }
 
     private static HashMap<Character, Integer> countCharacterOccurrences(String message) {
@@ -75,7 +78,6 @@ public class Huffman {
     private static HashMap<Character, String> createEncodingHashMap(HuffmanNode root, HashMap<Character, String> encodingMap, StringBuilder encodedChar) {
 
         if (root.getLeft() == null && root.getRight() == null) {
-            System.out.println(encodedChar.toString());
             encodingMap.put(root.getCharacter(), encodedChar.toString());
             return encodingMap;
         }
@@ -96,11 +98,34 @@ public class Huffman {
     private static String code(String message, HashMap<Character, String> encodingData) {
         StringBuilder builder = new StringBuilder();
 
-        for (char c:message.toCharArray()) {
+        for (char c : message.toCharArray()) {
             builder.append(encodingData.get(c));
             builder.append(" ");
         }
 
         return builder.toString();
+    }
+
+    /*
+     * Decoding
+     */
+    private static void decode(String input, HashMap<Character, String> encodingMap) {
+        HashMap<String, Character> decodingMap = getReversedMap(encodingMap);
+        String[] encodedParts = input.split(" ");
+        StringBuilder builder = new StringBuilder();
+        for (String character : encodedParts) {
+            builder.append(decodingMap.get(character));
+        }
+
+        System.out.println("Decoded Text: " + builder.toString());
+    }
+
+    private static HashMap<String, Character> getReversedMap(HashMap<Character, String> encodingMap) {
+
+        HashMap<String, Character> decodingMap = new HashMap<>();
+        for (char key : encodingMap.keySet()) {
+            decodingMap.put(encodingMap.get(key), key);
+        }
+        return decodingMap;
     }
 }
