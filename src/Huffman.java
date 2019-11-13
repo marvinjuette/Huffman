@@ -7,9 +7,12 @@ public class Huffman {
 
     public static void main(String[] args) {
         // Create scanner to ask for user input
+
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Bitte gib unten deinen Text ein. Zum komprimieren drücke Strg+D");
+        scanner.useDelimiter("\\Z");
         System.out.print("Text: ");
-        String message = scanner.nextLine();
+        String message = scanner.next();
 
         encode(message);
     }
