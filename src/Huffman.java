@@ -49,10 +49,13 @@ public class Huffman {
     }
 
     private static PriorityQueue<HuffmanNode> initQueue(HashMap<Character, Integer> data) {
+        // create empty priority queue
         PriorityQueue<HuffmanNode> nodes = new PriorityQueue<>(new HuffmanComparator());
 
+        // save hashMap in ArrayList to make it simpler to iterate through all values
         ArrayList<Character> occurredCharacters = new ArrayList<>(data.keySet());
 
+        // iterate through all occurred chars and create a node object for them and add them to the priority queue
         while (occurredCharacters.size() > 0) {
             HuffmanNode node = new HuffmanNode();
             node.setCharacter(occurredCharacters.remove(0));
@@ -63,7 +66,10 @@ public class Huffman {
     }
 
     private static HuffmanNode createTreeNodes(PriorityQueue<HuffmanNode> nodes) {
+        // create empty root node
         HuffmanNode root = null;
+
+        // create new node and set node1 as left Node and node2 as Right Node
         while (nodes.size() > 1) {
             HuffmanNode newFrequencyNode = new HuffmanNode();
             HuffmanNode node1 = nodes.poll();
@@ -75,21 +81,31 @@ public class Huffman {
             root = newFrequencyNode;
             nodes.add(newFrequencyNode);
         }
+
+        // at the end the only one node remains. This node is the root node of the Huffman-Tree
         return root;
     }
 
     private static HashMap<Character, String> createEncodingHashMap(HuffmanNode root, HashMap<Character, String> encodingMap, StringBuilder encodedChar) {
 
+        // check if there are more then on char
         if (root.getLeft() == null && root.getRight() == null) {
+            // if current node is a leaf the encoded char sequence gets added to encodingHashMap
             encodingMap.put(root.getCharacter(), encodedChar.toString());
             return encodingMap;
         }
+
+        // check if a left node is available
         if (root.getLeft() != null) {
+            // add 0 to encoded sequence of the current character
             encodedChar.append(0);
             createEncodingHashMap(root.getLeft(), encodingMap, encodedChar);
             encodedChar.deleteCharAt(encodedChar.length() - 1);
         }
+
+        // check if a right node is available
         if (root.getRight() != null) {
+            // add 1 to encoded sequence of the current character
             encodedChar.append(1);
             createEncodingHashMap(root.getRight(), encodingMap, encodedChar);
             encodedChar.deleteCharAt(encodedChar.length() - 1);
@@ -101,7 +117,10 @@ public class Huffman {
     private static String code(String message, HashMap<Character, String> encodingData) {
         StringBuilder builder = new StringBuilder();
 
+        // iterate trough original text
         for (char c : message.toCharArray()) {
+
+            // get encoded sequence of current char c and add it to encoded string
             builder.append(encodingData.get(c));
             builder.append(" ");
         }
@@ -113,9 +132,14 @@ public class Huffman {
      * Decoding
      */
     private static void decode(String input, HashMap<Character, String> encodingMap) {
-        HashMap<String, Character> decodingMap = getReversedMap(encodingMap);
+        // invert hashMap to get the char behind the encoded sequence
+        HashMap<String, Character> decodingMap = getInvertedMap(encodingMap);
+
+        // split the encoded text into it's sequences
         String[] encodedParts = input.split(" ");
         StringBuilder builder = new StringBuilder();
+
+        // add the character of sequence to the decoded string
         for (String character : encodedParts) {
             builder.append(decodingMap.get(character));
         }
@@ -123,9 +147,13 @@ public class Huffman {
         System.out.println("Decoded Text: " + builder.toString());
     }
 
-    private static HashMap<String, Character> getReversedMap(HashMap<Character, String> encodingMap) {
+    private static HashMap<String, Character> getInvertedMap(HashMap<Character, String> encodingMap) {
 
+        // create a new empty empty HashMap
         HashMap<String, Character> decodingMap = new HashMap<>();
+
+        // iterate through the keySet of the encoding map and store the sequence of the of the character as key and
+        // the characters as values in the invertedHashMap
         for (char key : encodingMap.keySet()) {
             decodingMap.put(encodingMap.get(key), key);
         }
